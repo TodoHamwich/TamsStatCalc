@@ -1,0 +1,148 @@
+﻿<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+  <title>Tams Stat Calculator</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 16px; background: #f9fafb; color: #111827; height: calc(100vh - 32px); display: flex; flex-direction: column; overflow: hidden; }
+    h2, h3 { margin-top: 0; }
+    .row { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; }
+    .warn { color: #b45309; background: #fef3c7; padding: 6px 10px; border-radius: 6px; display: inline-block; font-size: 0.9em; }
+    .panel { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .label { width: 140px; font-weight: 600; font-size: 0.9em; }
+    pre { background: #f3f4f6; padding: 10px; border-radius: 6px; overflow: auto; font-size: 0.85em; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; overflow: hidden; }
+    .column { display: flex; flex-direction: column; overflow: hidden; }
+    input[type="number"], input[type="text"], select { padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; }
+    button { padding: 8px 16px; cursor: pointer; border-radius: 4px; border: 1px solid #d1d5db; background: white; transition: all 0.2s; }
+    button:hover { background: #f3f4f6; }
+    button.primary { background: #2563eb; color: white; border-color: #1d4ed8; }
+    button.primary:hover { background: #1d4ed8; }
+    .stat-row { display: grid; grid-template-columns: 100px 50px 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .resource-bar { display: flex; gap: 20px; background: #1f2937; color: white; padding: 12px; border-radius: 8px; margin-bottom: 16px; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
+    .resource-item { display: flex; flex-direction: column; }
+    .resource-val { font-size: 1.2em; font-weight: bold; }
+    .resource-label { font-size: 0.7em; text-transform: uppercase; opacity: 0.8; }
+    .negative { color: #f87171; }
+    #skillList input { padding: 4px 8px; font-size: 0.9em; }
+    .scroll-panel { flex: 1; overflow-y: auto; padding-right: 4px; }
+    
+    /* Custom Dropdown for Skills to fix scrolling/visibility issues */
+    .skill-autocomplete { position: relative; flex: 1; }
+    .skill-suggestions { 
+        position: absolute; top: 100%; left: 0; right: 0; 
+        background: white; border: 1px solid #d1d5db; border-top: none; 
+        border-radius: 0 0 4px 4px; z-index: 1000; 
+        max-height: 200px; overflow-y: auto; 
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); display: none;
+    }
+    .suggestion-item { padding: 6px 12px; cursor: pointer; font-size: 0.9em; }
+    .suggestion-item:hover { background: #f3f4f6; }
+    
+    /* Simple Modal Styles */
+    #loadModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-content { background: white; padding: 20px; border-radius: 8px; width: 400px; max-height: 80vh; display: flex; flex-direction: column; }
+    .file-list { margin: 12px 0; overflow-y: auto; flex: 1; border: 1px solid #e5e7eb; border-radius: 4px; }
+    .file-item { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
+    .file-item:hover { background: #f3f4f6; }
+  </style>
+</head>
+<body>
+  <div id="loadModal">
+    <div class="modal-content">
+      <h3>Load Character / NPC</h3>
+      <div id="fileList" class="file-list"></div>
+      <div style="text-align:right; margin-top: 10px;">
+        <button id="closeModalBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="resource-bar">
+    <div class="resource-item"><span class="resource-label">Stat UPs</span><span id="statRes" class="resource-val">0</span></div>
+    <div class="resource-item"><span class="resource-label">Skill UPs</span><span id="skillRes" class="resource-val">0</span></div>
+    <div class="resource-item"><span class="resource-label">Major Skill Pts</span><span id="mspRes" class="resource-val">0</span></div>
+    <div class="resource-item" style="margin-left:auto; text-align:right">
+        <div id="charDisplayName" style="font-weight:bold">New Character</div>
+        <div id="saveStatus" style="font-size:0.7em; opacity:0.7">Not saved</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="column">
+      <div class="panel">
+        <h3>Identity & Setup</h3>
+        <div class="row">
+          <div class="label">Name</div>
+          <input id="charName" type="text" placeholder="Character Name" style="flex:1" />
+        </div>
+        <div class="row">
+          <div class="label">Type</div>
+          <label><input type="checkbox" id="isNpc" /> Is NPC</label>
+        </div>
+        <div class="row">
+          <div class="label">Phase of Life</div>
+          <select id="pol" style="flex:1"></select>
+        </div>
+        <div class="row">
+          <div class="label">Important NPCs</div>
+          <input id="npcs" type="number" min="0" step="1" value="0" />
+          <span id="npcHelp" style="font-size:0.8em; color: #6b7280"></span>
+        </div>
+        <div id="gmNotes" class="row" style="display:none">
+          <span class="warn">⚠️ <span id="gmReasons"></span></span>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="saveBtn" class="primary">Save</button>
+          <button id="loadBtn">Load</button>
+        </div>
+      </div>
+
+      <div class="panel scroll-panel">
+        <h3>Stats</h3>
+        <div id="statControls"></div>
+      </div>
+    </div>
+
+    <div class="column">
+      <div class="panel">
+        <h3>Major Skill Points</h3>
+        <p style="font-size:0.8em; color: #6b7280; margin-bottom:10px">
+          Spend MSP per skill in the list below to set base familiarity floors.
+        </p>
+      </div>
+
+      <div class="panel scroll-panel">
+        <h3>Skills</h3>
+        <div style="display:flex; gap:8px; font-size:0.8em; color:#6b7280; margin-bottom:4px; padding-left:4px">
+            <span style="flex:1">Skill Name</span>
+            <span style="width:40px">MSP</span>
+            <span style="width:50px">Value</span>
+            <span style="width:30px"></span>
+        </div>
+        <div id="skillList" style="margin-bottom: 12px;"></div>
+        <button id="addSkillBtn" style="width:100%">+ Add Skill</button>
+      </div>
+
+      <div class="panel" style="display:none">
+        <h3>Raw Data (Debug)</h3>
+        <pre id="debugOutput" style="max-height: 100px"></pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.exports = {};
+    const path = require('path');
+    const bootPath = path.join(__dirname, 'dist', 'boot.js');
+    console.log('Loading boot from:', bootPath);
+    try {
+      require(bootPath);
+      console.log('Boot loaded successfully');
+    } catch (err) {
+      console.error('Failed to load boot:', err);
+    }
+  </script>
+</body>
+</html>

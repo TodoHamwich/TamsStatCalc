@@ -1,0 +1,17 @@
+{
+  "name": "15",
+  "isNpc": false,
+  "setup": {
+    "phaseOfLife": "Middle-aged (30-50)",
+    "importantNpcCount": 0
+  },
+  "stats": {
+    "Strength": 30,
+    "Dexterity": 30,
+    "Endurance": 30,
+    "Wisdom": 30,
+    "Intelligence": 30
+  },
+  "skills": [],
+  "majorSkillPointsSpent": 0
+}

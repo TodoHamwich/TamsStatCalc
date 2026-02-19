@@ -1,0 +1,23 @@
+{
+  "name": "Glorpinator",
+  "isNpc": false,
+  "setup": {
+    "phaseOfLife": "Early Adulthood (20-30)",
+    "importantNpcCount": 4
+  },
+  "stats": {
+    "Strength": 25,
+    "Dexterity": 25,
+    "Endurance": 25,
+    "Wisdom": 25,
+    "Intelligence": 25
+  },
+  "skills": [
+    {
+      "name": "",
+      "value": 0,
+      "mspSpent": 0
+    }
+  ],
+  "majorSkillPointsSpent": 0
+}
