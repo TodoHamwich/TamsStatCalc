@@ -23,11 +23,26 @@ export interface ResourcePool {
     majorSkillPoints: number;
 }
 
+export interface Trait {
+    name: string;
+    level: number; // 1 to 10
+    bonusStat?: StatName | "Profession";
+}
+
+export interface DowntimeResources {
+    statUps: number;
+    skillUps: number;
+    traitUps: number;
+    abilityOrWeaponUps: number;
+}
+
 export interface CharacterData {
     name: string;
     isNpc: boolean;
     setup: CharacterSetup;
     stats: Stats;
     skills: Skill[];
+    traits: Trait[];
+    downtime: DowntimeResources;
     majorSkillPointsSpent: number;
 }

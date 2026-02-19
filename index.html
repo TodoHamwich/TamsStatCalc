@@ -20,13 +20,20 @@
     button.primary { background: #2563eb; color: white; border-color: #1d4ed8; }
     button.primary:hover { background: #1d4ed8; }
     .stat-row { display: grid; grid-template-columns: 100px 50px 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
-    .resource-bar { display: flex; gap: 20px; background: #1f2937; color: white; padding: 12px; border-radius: 8px; margin-bottom: 16px; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
+    .resource-bar { display: flex; gap: 20px; background: #1f2937; color: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
     .resource-item { display: flex; flex-direction: column; }
     .resource-val { font-size: 1.2em; font-weight: bold; }
     .resource-label { font-size: 0.7em; text-transform: uppercase; opacity: 0.8; }
     .negative { color: #f87171; }
-    #skillList input { padding: 4px 8px; font-size: 0.9em; }
+    #skillList input, #traitList input { padding: 4px 8px; font-size: 0.9em; }
     .scroll-panel { flex: 1; overflow-y: auto; padding-right: 4px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+    .tab { padding: 8px 16px; cursor: pointer; background: #e5e7eb; border-radius: 6px 6px 0 0; font-weight: 600; font-size: 0.9em; border: 1px solid #d1d5db; border-bottom: none; }
+    .tab.active { background: white; border-bottom: 2px solid white; margin-bottom: -1px; }
+    .tab-content { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+    .tab-content.active { display: flex; }
     
     /* Custom Dropdown for Skills to fix scrolling/visibility issues */
     .skill-autocomplete { position: relative; flex: 1; }
@@ -62,6 +69,7 @@
   <div class="resource-bar">
     <div class="resource-item"><span class="resource-label">Stat UPs</span><span id="statRes" class="resource-val">0</span></div>
     <div class="resource-item"><span class="resource-label">Skill UPs</span><span id="skillRes" class="resource-val">0</span></div>
+    <div class="resource-item"><span class="resource-label">Trait UPs</span><span id="traitRes" class="resource-val">0</span></div>
     <div class="resource-item"><span class="resource-label">Major Skill Pts</span><span id="mspRes" class="resource-val">0</span></div>
     <div class="resource-item" style="margin-left:auto; text-align:right">
         <div id="charDisplayName" style="font-weight:bold">New Character</div>
@@ -69,67 +77,107 @@
     </div>
   </div>
 
-  <div class="grid">
-    <div class="column">
-      <div class="panel">
-        <h3>Identity & Setup</h3>
-        <div class="row">
-          <div class="label">Name</div>
-          <input id="charName" type="text" placeholder="Character Name" style="flex:1" />
+  <div class="tabs">
+    <div class="tab active" data-tab="creationTab">Character Creation</div>
+    <div class="tab" data-tab="downtimeTab">Downtime</div>
+  </div>
+
+  <div id="creationTab" class="tab-content active">
+    <div class="grid">
+      <div class="column">
+        <div class="panel">
+          <h3>Identity & Setup</h3>
+          <div class="row">
+            <div class="label">Name</div>
+            <input id="charName" type="text" placeholder="Character Name" style="flex:1" />
+          </div>
+          <div class="row">
+            <div class="label">Type</div>
+            <label><input type="checkbox" id="isNpc" /> Is NPC</label>
+          </div>
+          <div class="row">
+            <div class="label">Phase of Life</div>
+            <select id="pol" style="flex:1"></select>
+          </div>
+          <div class="row">
+            <div class="label">Important NPCs</div>
+            <input id="npcs" type="number" min="0" step="1" value="0" />
+            <span id="npcHelp" style="font-size:0.8em; color: #6b7280"></span>
+          </div>
+          <div id="gmNotes" class="row" style="display:none">
+            <span class="warn">⚠️ <span id="gmReasons"></span></span>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button id="saveBtn" class="primary">Save</button>
+            <button id="loadBtn">Load</button>
+          </div>
         </div>
-        <div class="row">
-          <div class="label">Type</div>
-          <label><input type="checkbox" id="isNpc" /> Is NPC</label>
-        </div>
-        <div class="row">
-          <div class="label">Phase of Life</div>
-          <select id="pol" style="flex:1"></select>
-        </div>
-        <div class="row">
-          <div class="label">Important NPCs</div>
-          <input id="npcs" type="number" min="0" step="1" value="0" />
-          <span id="npcHelp" style="font-size:0.8em; color: #6b7280"></span>
-        </div>
-        <div id="gmNotes" class="row" style="display:none">
-          <span class="warn">⚠️ <span id="gmReasons"></span></span>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button id="saveBtn" class="primary">Save</button>
-          <button id="loadBtn">Load</button>
+
+        <div class="panel scroll-panel">
+          <h3>Stats</h3>
+          <div id="statControls"></div>
         </div>
       </div>
 
-      <div class="panel scroll-panel">
-        <h3>Stats</h3>
-        <div id="statControls"></div>
-      </div>
-    </div>
+      <div class="column">
+        <div class="panel scroll-panel">
+          <h3>Skills</h3>
+          <div style="display:flex; gap:8px; font-size:0.8em; color:#6b7280; margin-bottom:4px; padding-left:4px">
+              <span style="flex:1">Skill Name</span>
+              <span style="width:40px">MSP</span>
+              <span style="width:50px">Value</span>
+              <span style="width:30px"></span>
+          </div>
+          <div id="skillList" style="margin-bottom: 12px;"></div>
+          <button id="addSkillBtn" style="width:100%">+ Add Skill</button>
+        </div>
 
-    <div class="column">
-      <div class="panel">
-        <h3>Major Skill Points</h3>
-        <p style="font-size:0.8em; color: #6b7280; margin-bottom:10px">
-          Spend MSP per skill in the list below to set base familiarity floors.
-        </p>
-      </div>
-
-      <div class="panel scroll-panel">
-        <h3>Skills</h3>
-        <div style="display:flex; gap:8px; font-size:0.8em; color:#6b7280; margin-bottom:4px; padding-left:4px">
-            <span style="flex:1">Skill Name</span>
-            <span style="width:40px">MSP</span>
-            <span style="width:50px">Value</span>
+        <div class="panel scroll-panel">
+          <h3>Traits</h3>
+          <p style="font-size:0.8em; color: #6b7280; margin-bottom:10px">
+            Traits cost Traits UPs equal to the new level (e.g. 1 to 2 costs 2). Level 1 to 10.
+          </p>
+          <div style="display:flex; gap:8px; font-size:0.8em; color:#6b7280; margin-bottom:4px; padding-left:4px">
+            <span style="flex:1">Trait Name</span>
+            <span style="width:90px">Bonus Stat</span>
+            <span style="width:50px">Level</span>
             <span style="width:30px"></span>
+          </div>
+          <div id="traitList" style="margin-bottom: 12px;"></div>
+          <button id="addTraitBtn" style="width:100%">+ Add Trait</button>
         </div>
-        <div id="skillList" style="margin-bottom: 12px;"></div>
-        <button id="addSkillBtn" style="width:100%">+ Add Skill</button>
-      </div>
-
-      <div class="panel" style="display:none">
-        <h3>Raw Data (Debug)</h3>
-        <pre id="debugOutput" style="max-height: 100px"></pre>
       </div>
     </div>
+  </div>
+
+  <div id="downtimeTab" class="tab-content">
+    <div class="panel">
+      <h3>Downtime Upgrades</h3>
+      <p style="font-size:0.8em; color: #6b7280; margin-bottom:16px">
+        Manually add extra Upgrade Points earned through downtime or special events.
+      </p>
+      <div class="row">
+        <div class="label">Extra Stat UPs</div>
+        <input id="dtStatUps" type="number" min="0" value="0" />
+      </div>
+      <div class="row">
+        <div class="label">Extra Skill UPs</div>
+        <input id="dtSkillUps" type="number" min="0" value="0" />
+      </div>
+      <div class="row">
+        <div class="label">Extra Trait UPs</div>
+        <input id="dtTraitUps" type="number" min="0" value="0" />
+      </div>
+      <div class="row">
+        <div class="label">Extra Ability/Weapon UPs</div>
+        <input id="dtAbilityUps" type="number" min="0" value="0" />
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="display:none">
+    <h3>Raw Data (Debug)</h3>
+    <pre id="debugOutput" style="max-height: 100px"></pre>
   </div>
 
   <script>

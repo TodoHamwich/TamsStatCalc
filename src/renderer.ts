@@ -1,7 +1,7 @@
 ﻿import { PhaseOfLife } from './constants';
 import { computeResources, getStartingStatsForPhase, getPhaseCount } from './resources';
-import { applyMajorSkillPoints, getSkillChangeCost, getStatChangeCost } from './logic';
-import { CharacterData, Stats, Skill } from './types';
+import { applyMajorSkillPoints, getSkillChangeCost, getStatChangeCost, getTraitChangeCost } from './logic';
+import { CharacterData, Stats, Skill, Trait, StatName } from './types';
 import { checkCustomSkillName, emptyGmNotes } from './validation';
 import { STANDARD_SKILLS } from './skills';
 import * as fs from 'fs-extra';
@@ -32,6 +32,8 @@ let currentCharacter: CharacterData = {
     setup: { phaseOfLife: PhaseOfLife.EarlyAdulthood, importantNpcCount: 0 },
     stats: getStartingStatsForPhase(PhaseOfLife.EarlyAdulthood),
     skills: [],
+    traits: [],
+    downtime: { statUps: 0, skillUps: 0, traitUps: 0, abilityOrWeaponUps: 0 },
     majorSkillPointsSpent: 0
 };
 
@@ -46,11 +48,18 @@ const gmReasonsSpan = document.getElementById('gmReasons') as HTMLSpanElement;
 
 const statRes = document.getElementById('statRes') as HTMLSpanElement;
 const skillRes = document.getElementById('skillRes') as HTMLSpanElement;
+const traitRes = document.getElementById('traitRes') as HTMLSpanElement;
 const mspRes = document.getElementById('mspRes') as HTMLSpanElement;
 
 const statControls = document.getElementById('statControls') as HTMLDivElement;
 const skillList = document.getElementById('skillList') as HTMLDivElement;
+const traitList = document.getElementById('traitList') as HTMLDivElement;
 const debugOutput = document.getElementById('debugOutput') as HTMLPreElement;
+
+const dtStatUps = document.getElementById('dtStatUps') as HTMLInputElement;
+const dtSkillUps = document.getElementById('dtSkillUps') as HTMLInputElement;
+const dtTraitUps = document.getElementById('dtTraitUps') as HTMLInputElement;
+const dtAbilityUps = document.getElementById('dtAbilityUps') as HTMLInputElement;
 
 const loadModal = document.getElementById('loadModal') as HTMLDivElement;
 const fileList = document.getElementById('fileList') as HTMLDivElement;
@@ -59,6 +68,7 @@ const closeModalBtn = document.getElementById('closeModalBtn') as HTMLButtonElem
 const saveBtn = document.getElementById('saveBtn') as HTMLButtonElement;
 const loadBtn = document.getElementById('loadBtn') as HTMLButtonElement;
 const addSkillBtn = document.getElementById('addSkillBtn') as HTMLButtonElement;
+const addTraitBtn = document.getElementById('addTraitBtn') as HTMLButtonElement;
 const charDisplayName = document.getElementById('charDisplayName') as HTMLDivElement;
 const saveStatus = document.getElementById('saveStatus') as HTMLDivElement;
 
@@ -91,7 +101,17 @@ function init() {
         
         const label = document.createElement('div');
         label.className = 'label';
-        label.textContent = name;
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = name;
+        label.appendChild(nameSpan);
+
+        const bonusSpan = document.createElement('span');
+        bonusSpan.style.fontSize = '0.75em';
+        bonusSpan.style.color = '#10b981';
+        bonusSpan.style.marginLeft = '4px';
+        bonusSpan.id = `bonus-${name}`;
+        label.appendChild(bonusSpan);
         
         const valInp = document.createElement('input');
         valInp.type = 'number';
@@ -134,6 +154,37 @@ function init() {
 
     syncUI();
     console.log('Initial syncUI complete.');
+
+    // Tabs logic
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            tab.classList.add('active');
+            const contentId = (tab as HTMLElement).dataset.tab;
+            if (contentId) {
+                document.getElementById(contentId)?.classList.add('active');
+            }
+        });
+    });
+
+    addTraitBtn.onclick = () => {
+        currentCharacter.traits.push({ name: '', level: 1 });
+        renderTraits();
+        updateResources();
+    };
+
+    [dtStatUps, dtSkillUps, dtTraitUps, dtAbilityUps].forEach(inp => {
+        inp.oninput = () => {
+            currentCharacter.downtime.statUps = parseInt(dtStatUps.value) || 0;
+            currentCharacter.downtime.skillUps = parseInt(dtSkillUps.value) || 0;
+            currentCharacter.downtime.traitUps = parseInt(dtTraitUps.value) || 0;
+            currentCharacter.downtime.abilityOrWeaponUps = parseInt(dtAbilityUps.value) || 0;
+            updateResources();
+        };
+    });
 }
 
 /** Sync all UI values from currentCharacter */
@@ -151,6 +202,14 @@ function syncUI() {
     });
     
     renderSkills();
+    renderTraits();
+    
+    // Downtime
+    dtStatUps.value = String(currentCharacter.downtime?.statUps || 0);
+    dtSkillUps.value = String(currentCharacter.downtime?.skillUps || 0);
+    dtTraitUps.value = String(currentCharacter.downtime?.traitUps || 0);
+    dtAbilityUps.value = String(currentCharacter.downtime?.abilityOrWeaponUps || 0);
+
     updateResources();
 }
 
@@ -255,6 +314,68 @@ function renderSkills() {
     });
 }
 
+function renderTraits() {
+    traitList.innerHTML = '';
+    if (!currentCharacter.traits) currentCharacter.traits = [];
+    currentCharacter.traits.forEach((trait, index) => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.gap = '8px';
+        row.style.marginBottom = '8px';
+        row.style.alignItems = 'center';
+
+        const nameInp = document.createElement('input');
+        nameInp.type = 'text';
+        nameInp.value = trait.name;
+        nameInp.placeholder = 'Trait Name';
+        nameInp.style.flex = '1';
+        nameInp.oninput = (e) => {
+            currentCharacter.traits[index].name = (e.target as HTMLInputElement).value;
+            updateResources();
+        };
+
+        const bonusSel = document.createElement('select');
+        bonusSel.style.width = '90px';
+        const options: (StatName | "Profession" | "")[] = ["", "Strength", "Dexterity", "Endurance", "Wisdom", "Intelligence", "Profession"];
+        options.forEach(opt => {
+            const o = document.createElement('option');
+            o.value = opt;
+            o.textContent = opt || "None";
+            bonusSel.appendChild(o);
+        });
+        bonusSel.value = trait.bonusStat || "";
+        bonusSel.onchange = () => {
+            currentCharacter.traits[index].bonusStat = (bonusSel.value as StatName | "Profession") || undefined;
+            updateResources();
+        };
+
+        const levelInp = document.createElement('input');
+        levelInp.type = 'number';
+        levelInp.min = '1';
+        levelInp.max = '10';
+        levelInp.value = String(trait.level);
+        levelInp.style.width = '50px';
+        levelInp.oninput = (e) => {
+            currentCharacter.traits[index].level = parseInt((e.target as HTMLInputElement).value) || 1;
+            updateResources();
+        };
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '×';
+        delBtn.onclick = () => {
+            currentCharacter.traits.splice(index, 1);
+            renderTraits();
+            updateResources();
+        };
+
+        row.appendChild(nameInp);
+        row.appendChild(bonusSel);
+        row.appendChild(levelInp);
+        row.appendChild(delBtn);
+        traitList.appendChild(row);
+    });
+}
+
 function updateResources() {
     // Update simple fields in state
     currentCharacter.name = charNameInput.value;
@@ -262,10 +383,29 @@ function updateResources() {
     currentCharacter.setup.phaseOfLife = polSelect.value as PhaseOfLife;
     currentCharacter.setup.importantNpcCount = parseInt(npcsInput.value) || 0;
 
-    // Update stat displays (avoiding focus loss if possible, though numbers are mostly updated via btn or init)
+    let totalTraitCost = 0;
+    let traitRefunds = false;
+    const traitStatBonuses: Record<string, number> = { Strength: 0, Dexterity: 0, Endurance: 0, Wisdom: 0, Intelligence: 0 };
+    
+    if (!currentCharacter.traits) currentCharacter.traits = [];
+    currentCharacter.traits.forEach(tr => {
+        const change = getTraitChangeCost(0, tr.level);
+        totalTraitCost += change.cost;
+        if (tr.bonusStat && tr.bonusStat !== "Profession") {
+            traitStatBonuses[tr.bonusStat] += tr.level * 5;
+        }
+    });
+
+    // Update stat displays
     (Object.keys(currentCharacter.stats) as (keyof Stats)[]).forEach(name => {
         if (document.activeElement !== statValElements[name]) {
             statValElements[name].value = String(currentCharacter.stats[name]);
+        }
+        const bonusEl = document.getElementById(`bonus-${name}`);
+        if (bonusEl) {
+            const bonus = traitStatBonuses[name] || 0;
+            bonusEl.textContent = bonus > 0 ? `(+${bonus})` : '';
+            bonusEl.title = `Total: ${currentCharacter.stats[name] + bonus}`;
         }
     });
 
@@ -289,7 +429,6 @@ function updateResources() {
     // Calculate Skill Costs
     let totalSkillCost = 0;
     let skillRefunds = false;
-    const mspValue = applyMajorSkillPoints(currentCharacter.majorSkillPointsSpent);
     
     // Check for custom skill names using validation tool logic
     const gmNotes = emptyGmNotes();
@@ -305,8 +444,10 @@ function updateResources() {
     const mspLeft = resources.majorSkillPoints - mspSpentTotal;
     
     // Resources Left
-    const sLeft = resources.statUps - totalStatCost;
-    const skLeft = resources.skillUps - totalSkillCost;
+    const dt = currentCharacter.downtime || { statUps: 0, skillUps: 0, traitUps: 0, abilityOrWeaponUps: 0 };
+    const sLeft = (resources.statUps + dt.statUps) - totalStatCost;
+    const skLeft = (resources.skillUps + dt.skillUps) - totalSkillCost;
+    const trLeft = (resources.traitUps + dt.traitUps) - totalTraitCost;
 
     // Resource Display
     statRes.textContent = String(sLeft);
@@ -314,6 +455,9 @@ function updateResources() {
     
     skillRes.textContent = String(skLeft);
     skillRes.className = skLeft < 0 ? 'resource-val negative' : 'resource-val';
+    
+    traitRes.textContent = String(trLeft);
+    traitRes.className = trLeft < 0 ? 'resource-val negative' : 'resource-val';
     
     mspRes.textContent = String(mspLeft);
     mspRes.className = mspLeft < 0 ? 'resource-val negative' : 'resource-val';
@@ -324,6 +468,7 @@ function updateResources() {
     if (phase === PhaseOfLife.Elder) reasons.push('Elder Phase');
     if (statRefunds) reasons.push('Stat decrease');
     if (skillRefunds) reasons.push('Skill decrease');
+    if (trLeft < 0) reasons.push('Overspent Trait UPs');
     if (currentCharacter.setup.importantNpcCount > maxNpcs) reasons.push('NPC count over limit');
 
     if (reasons.length) {
