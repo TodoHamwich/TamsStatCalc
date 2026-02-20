@@ -49,20 +49,26 @@ function calculateTraitUpgradeCost(from, to) {
     // from is current level, to is target level.
     // going from 1 to 2 costs 2.
     // going from 1 to 3 costs 2 + 3 = 5.
-    for (let current = from + 1; current <= to; current++) {
-        totalCost += current;
+    // We use absolute values for negative traits to calculate cost
+    const start = Math.abs(from);
+    const end = Math.abs(to);
+    if (end > start) {
+        for (let current = start + 1; current <= end; current++) {
+            totalCost += current;
+        }
+    }
+    else if (end < start) {
+        for (let current = end + 1; current <= start; current++) {
+            totalCost -= current;
+        }
     }
     return totalCost;
 }
 function getTraitChangeCost(from, to) {
     if (to === from)
         return { cost: 0, refund: false };
-    if (to > from) {
-        return { cost: calculateTraitUpgradeCost(from, to), refund: false };
-    }
-    else {
-        return { cost: -calculateTraitUpgradeCost(to, from), refund: true };
-    }
+    const cost = calculateTraitUpgradeCost(from, to);
+    return { cost, refund: cost < 0 };
 }
 function applyMajorSkillPoints(points) {
     if (points === 1)

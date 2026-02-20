@@ -8,6 +8,7 @@ export interface Skill {
     name: string; // e.g., "Athletics(Climbing)"
     value: number; // familiarity, 0..40
     mspSpent: number; // 0, 1, 2, or 3
+    isCustomNameSuppressed?: boolean;
 }
 
 export interface CharacterSetup {

@@ -17,11 +17,13 @@ function validateNpcCount(npcs, maxPerPhases, notes) {
     }
     return capped;
 }
-function checkCustomSkillName(name, notes) {
+function checkCustomSkillName(name, notes, suppressed) {
     if (!name.trim())
         return; // ignore empty names
     if (!(0, skills_1.isStandardSkill)(name)) {
-        notes.talkToGm = true;
-        notes.reasons.push(`Custom skill "${name}" used (requires GM approval)`);
+        if (!suppressed) {
+            notes.talkToGm = true;
+            notes.reasons.push(`Custom skill "${name}" used (requires GM approval)`);
+        }
     }
 }

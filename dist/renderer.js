@@ -143,9 +143,17 @@ function init() {
         valInp.style.width = '50px';
         valInp.oninput = (e) => {
             let v = parseInt(e.target.value) || 0;
-            const startStats = (0, resources_1.getStartingStatsForPhase)(currentCharacter.setup.phaseOfLife);
-            if (v < startStats[name])
-                v = startStats[name];
+            const phase = currentCharacter.setup.phaseOfLife;
+            const startStats = (0, resources_1.getStartingStatsForPhase)(phase);
+            const traitStatBonuses = { Strength: 0, Dexterity: 0, Endurance: 0, Wisdom: 0, Intelligence: 0 };
+            currentCharacter.traits.forEach(tr => {
+                if (tr.bonusStat && tr.bonusStat !== "Profession") {
+                    traitStatBonuses[tr.bonusStat] += tr.level * 5;
+                }
+            });
+            const effectiveStart = startStats[name] + (traitStatBonuses[name] || 0);
+            if (v < effectiveStart)
+                v = effectiveStart;
             currentCharacter.stats[name] = v;
             e.target.value = String(v);
             updateResources();
@@ -157,8 +165,16 @@ function init() {
         const btnMinus = document.createElement('button');
         btnMinus.textContent = '-';
         btnMinus.onclick = () => {
-            const startStats = (0, resources_1.getStartingStatsForPhase)(currentCharacter.setup.phaseOfLife);
-            if (currentCharacter.stats[name] > startStats[name]) {
+            const phase = currentCharacter.setup.phaseOfLife;
+            const startStats = (0, resources_1.getStartingStatsForPhase)(phase);
+            const traitStatBonuses = { Strength: 0, Dexterity: 0, Endurance: 0, Wisdom: 0, Intelligence: 0 };
+            currentCharacter.traits.forEach(tr => {
+                if (tr.bonusStat && tr.bonusStat !== "Profession") {
+                    traitStatBonuses[tr.bonusStat] += tr.level * 5;
+                }
+            });
+            const effectiveStart = startStats[name] + (traitStatBonuses[name] || 0);
+            if (currentCharacter.stats[name] > effectiveStart) {
                 currentCharacter.stats[name]--;
                 valInp.value = String(currentCharacter.stats[name]);
                 updateResources();
@@ -312,6 +328,26 @@ function renderSkills() {
             e.target.value = String(v);
             updateResources();
         };
+        const suppressContainer = document.createElement('div');
+        suppressContainer.style.display = 'flex';
+        suppressContainer.style.alignItems = 'center';
+        suppressContainer.style.gap = '4px';
+        suppressContainer.style.fontSize = '0.7em';
+        suppressContainer.title = "Suppress 'Custom Skill' warning for GM notes";
+        const isStandard = (0, skills_1.isStandardSkill)(skill.name);
+        if (!isStandard && skill.name.trim() !== '') {
+            const suppressCheck = document.createElement('input');
+            suppressCheck.type = 'checkbox';
+            suppressCheck.checked = !!skill.isCustomNameSuppressed;
+            suppressCheck.onchange = () => {
+                currentCharacter.skills[index].isCustomNameSuppressed = suppressCheck.checked;
+                updateResources();
+            };
+            const suppressLabel = document.createElement('label');
+            suppressLabel.textContent = 'Ignore';
+            suppressContainer.appendChild(suppressCheck);
+            suppressContainer.appendChild(suppressLabel);
+        }
         const delBtn = document.createElement('button');
         delBtn.textContent = '×';
         delBtn.onclick = () => {
@@ -322,6 +358,7 @@ function renderSkills() {
         };
         row.appendChild(container);
         row.appendChild(valInp);
+        row.appendChild(suppressContainer);
         row.appendChild(delBtn);
         skillList.appendChild(row);
     });
@@ -426,14 +463,14 @@ function renderTraits() {
         };
         const levelInp = document.createElement('input');
         levelInp.type = 'number';
-        levelInp.min = '1';
+        levelInp.min = '-10';
         levelInp.max = '10';
         levelInp.value = String(trait.level);
-        levelInp.style.width = '50px';
+        levelInp.style.width = '60px';
         levelInp.oninput = (e) => {
-            let v = parseInt(e.target.value) || 1;
-            if (v < 1)
-                v = 1;
+            let v = parseInt(e.target.value) || 0;
+            if (v < -10)
+                v = -10;
             if (v > 10)
                 v = 10;
             currentCharacter.traits[index].level = v;
@@ -466,10 +503,21 @@ function updateResources() {
     if (!currentCharacter.traits)
         currentCharacter.traits = [];
     currentCharacter.traits.forEach(tr => {
-        const change = (0, logic_1.getTraitChangeCost)(0, tr.level);
-        totalTraitCost += change.cost;
+        const cost = (0, logic_1.calculateTraitUpgradeCost)(0, tr.level);
+        totalTraitCost += cost;
+        if (cost < 0)
+            traitRefunds = true;
         if (tr.bonusStat && tr.bonusStat !== "Profession") {
             traitStatBonuses[tr.bonusStat] += tr.level * 5;
+        }
+    });
+    const phase = currentCharacter.setup.phaseOfLife;
+    const startStats = (0, resources_1.getStartingStatsForPhase)(phase);
+    // Ensure stats are not below effective minimum (startStat + traitBonus)
+    Object.keys(currentCharacter.stats).forEach(name => {
+        const effectiveMin = startStats[name] + (traitStatBonuses[name] || 0);
+        if (currentCharacter.stats[name] < effectiveMin) {
+            currentCharacter.stats[name] = effectiveMin;
         }
     });
     // Update stat displays
@@ -481,22 +529,21 @@ function updateResources() {
         if (bonusEl) {
             const bonus = traitStatBonuses[name] || 0;
             bonusEl.textContent = bonus > 0 ? `(+${bonus})` : '';
-            bonusEl.title = `Total: ${currentCharacter.stats[name] + bonus}`;
+            bonusEl.title = `Total: ${currentCharacter.stats[name]}`;
         }
     });
-    const phase = currentCharacter.setup.phaseOfLife;
     const maxNpcs = (0, resources_1.getPhaseCount)(phase);
     npcsInput.max = String(maxNpcs);
     npcHelp.textContent = `(Max: ${maxNpcs})`;
     const resources = (0, resources_1.computeResources)(currentCharacter.setup);
-    const startStats = (0, resources_1.getStartingStatsForPhase)(phase);
     if (startingStatDisplay)
         startingStatDisplay.textContent = String(startStats.Strength);
     // Calculate Stat Costs
     let totalStatCost = 0;
     let statRefunds = false;
     Object.keys(currentCharacter.stats).forEach(s => {
-        const change = (0, logic_1.getStatChangeCost)(startStats[s], currentCharacter.stats[s]);
+        const effectiveStartStat = startStats[s] + (traitStatBonuses[s] || 0);
+        const change = (0, logic_1.getStatChangeCost)(effectiveStartStat, currentCharacter.stats[s]);
         totalStatCost += change.cost;
         if (change.refund)
             statRefunds = true;
@@ -512,7 +559,7 @@ function updateResources() {
         totalSkillCost += change.cost;
         if (change.refund)
             skillRefunds = true;
-        (0, validation_1.checkCustomSkillName)(sk.name, gmNotes);
+        (0, validation_1.checkCustomSkillName)(sk.name, gmNotes, sk.isCustomNameSuppressed);
     });
     const mspSpentTotal = currentCharacter.skills.reduce((sum, sk) => sum + (sk.mspSpent || 0), 0);
     const mspLeft = resources.majorSkillPoints - mspSpentTotal;
@@ -557,6 +604,8 @@ function updateResources() {
         reasons.push('Skill value decreased (requires GM approval for point refund)');
     if (trLeft < 0)
         reasons.push(`Overspent Trait UPs (${-trLeft})`);
+    if (traitRefunds)
+        reasons.push('Trait level decreased (requires GM approval for point refund)');
     if (currentCharacter.setup.importantNpcCount > maxNpcs)
         reasons.push(`NPC count (${currentCharacter.setup.importantNpcCount}) exceeds phase limit (${maxNpcs})`);
     if (reasons.length) {
