@@ -20,5 +20,6 @@ function computeResources(setup) {
         traitUps: phases * constants_1.RESOURCES_PER_PHASE.traitUps,
         abilityOrWeaponUps: phases * constants_1.RESOURCES_PER_PHASE.abilityOrWeaponUps,
         majorSkillPoints: phases * constants_1.RESOURCES_PER_PHASE.majorSkillPoints,
+        abilityPoints: phases * constants_1.RESOURCES_PER_PHASE.abilityPoints,
     };
 }

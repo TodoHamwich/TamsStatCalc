@@ -1,0 +1,256 @@
+﻿warning: in the working copy of 'release/builder-debug.yml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'release/builder-effective-config.yaml', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'release/win-unpacked/LICENSE.electron.txt', LF will be replaced by CRLF the next time Git touches it
+[main 33d4a6c] Source code finalize
+ 78 files changed, 281364 insertions(+)
+ create mode 100644 release/TamsStatCalculator 1.0.0.exe
+ create mode 100644 release/builder-debug.yml
+ create mode 100644 release/builder-effective-config.yaml
+ create mode 100644 release/win-unpacked/LICENSE.electron.txt
+ create mode 100644 release/win-unpacked/LICENSES.chromium.html
+ create mode 100644 release/win-unpacked/TamsStatCalculator.exe
+ create mode 100644 release/win-unpacked/chrome_100_percent.pak
+ create mode 100644 release/win-unpacked/chrome_200_percent.pak
+ create mode 100644 release/win-unpacked/d3dcompiler_47.dll
+ create mode 100644 release/win-unpacked/dxcompiler.dll
+ create mode 100644 release/win-unpacked/dxil.dll
+ create mode 100644 release/win-unpacked/ffmpeg.dll
+ create mode 100644 release/win-unpacked/icudtl.dat
+ create mode 100644 release/win-unpacked/libEGL.dll
+ create mode 100644 release/win-unpacked/libGLESv2.dll
+ create mode 100644 release/win-unpacked/locales/af.pak
+ create mode 100644 release/win-unpacked/locales/am.pak
+ create mode 100644 release/win-unpacked/locales/ar.pak
+ create mode 100644 release/win-unpacked/locales/bg.pak
+ create mode 100644 release/win-unpacked/locales/bn.pak
+ create mode 100644 release/win-unpacked/locales/ca.pak
+ create mode 100644 release/win-unpacked/locales/cs.pak
+ create mode 100644 release/win-unpacked/locales/da.pak
+ create mode 100644 release/win-unpacked/locales/de.pak
+ create mode 100644 release/win-unpacked/locales/el.pak
+ create mode 100644 release/win-unpacked/locales/en-GB.pak
+ create mode 100644 release/win-unpacked/locales/en-US.pak
+ create mode 100644 release/win-unpacked/locales/es-419.pak
+ create mode 100644 release/win-unpacked/locales/es.pak
+ create mode 100644 release/win-unpacked/locales/et.pak
+ create mode 100644 release/win-unpacked/locales/fa.pak
+ create mode 100644 release/win-unpacked/locales/fi.pak
+ create mode 100644 release/win-unpacked/locales/fil.pak
+ create mode 100644 release/win-unpacked/locales/fr.pak
+ create mode 100644 release/win-unpacked/locales/gu.pak
+ create mode 100644 release/win-unpacked/locales/he.pak
+ create mode 100644 release/win-unpacked/locales/hi.pak
+ create mode 100644 release/win-unpacked/locales/hr.pak
+ create mode 100644 release/win-unpacked/locales/hu.pak
+ create mode 100644 release/win-unpacked/locales/id.pak
+ create mode 100644 release/win-unpacked/locales/it.pak
+ create mode 100644 release/win-unpacked/locales/ja.pak
+ create mode 100644 release/win-unpacked/locales/kn.pak
+ create mode 100644 release/win-unpacked/locales/ko.pak
+ create mode 100644 release/win-unpacked/locales/lt.pak
+ create mode 100644 release/win-unpacked/locales/lv.pak
+ create mode 100644 release/win-unpacked/locales/ml.pak
+ create mode 100644 release/win-unpacked/locales/mr.pak
+ create mode 100644 release/win-unpacked/locales/ms.pak
+ create mode 100644 release/win-unpacked/locales/nb.pak
+ create mode 100644 release/win-unpacked/locales/nl.pak
+ create mode 100644 release/win-unpacked/locales/pl.pak
+ create mode 100644 release/win-unpacked/locales/pt-BR.pak
+ create mode 100644 release/win-unpacked/locales/pt-PT.pak
+ create mode 100644 release/win-unpacked/locales/ro.pak
+ create mode 100644 release/win-unpacked/locales/ru.pak
+ create mode 100644 release/win-unpacked/locales/sk.pak
+ create mode 100644 release/win-unpacked/locales/sl.pak
+ create mode 100644 release/win-unpacked/locales/sr.pak
+ create mode 100644 release/win-unpacked/locales/sv.pak
+ create mode 100644 release/win-unpacked/locales/sw.pak
+ create mode 100644 release/win-unpacked/locales/ta.pak
+ create mode 100644 release/win-unpacked/locales/te.pak
+ create mode 100644 release/win-unpacked/locales/th.pak
+ create mode 100644 release/win-unpacked/locales/tr.pak
+ create mode 100644 release/win-unpacked/locales/uk.pak
+ create mode 100644 release/win-unpacked/locales/ur.pak
+ create mode 100644 release/win-unpacked/locales/vi.pak
+ create mode 100644 release/win-unpacked/locales/zh-CN.pak
+ create mode 100644 release/win-unpacked/locales/zh-TW.pak
+ create mode 100644 release/win-unpacked/resources.pak
+ create mode 100644 release/win-unpacked/resources/app.asar
+ create mode 100644 release/win-unpacked/resources/elevate.exe
+ create mode 100644 release/win-unpacked/snapshot_blob.bin
+ create mode 100644 release/win-unpacked/v8_context_snapshot.bin
+ create mode 100644 release/win-unpacked/vk_swiftshader.dll
+ create mode 100644 release/win-unpacked/vk_swiftshader_icd.json
+ create mode 100644 release/win-unpacked/vulkan-1.dll
+WARNING: git-filter-branch has a glut of gotchas generating mangled history
+         rewrites.  Hit Ctrl-C before proceeding to abort, then use an
+         alternative filtering tool such as 'git filter-repo'
+         (https://github.com/newren/git-filter-repo/) instead.  See the
+         filter-branch manual page for more details; to squelch this warning,
+         set FILTER_BRANCH_SQUELCH_WARNING=1.
+Proceeding with filter-branch...
+Rewrite f7efbed668299fc36b812db0a7cada3d9a86c304 (1/3) (0 seconds passed, remaining 0 predicted)    rm 'release/TamsStatCalculator 1.0.0.exe'
+rm 'release/builder-debug.yml'
+rm 'release/builder-effective-config.yaml'
+rm 'release/win-unpacked/LICENSE.electron.txt'
+rm 'release/win-unpacked/LICENSES.chromium.html'
+rm 'release/win-unpacked/TamsStatCalculator.exe'
+rm 'release/win-unpacked/chrome_100_percent.pak'
+rm 'release/win-unpacked/chrome_200_percent.pak'
+rm 'release/win-unpacked/d3dcompiler_47.dll'
+rm 'release/win-unpacked/dxcompiler.dll'
+rm 'release/win-unpacked/dxil.dll'
+rm 'release/win-unpacked/ffmpeg.dll'
+rm 'release/win-unpacked/icudtl.dat'
+rm 'release/win-unpacked/libEGL.dll'
+rm 'release/win-unpacked/libGLESv2.dll'
+rm 'release/win-unpacked/locales/af.pak'
+rm 'release/win-unpacked/locales/am.pak'
+rm 'release/win-unpacked/locales/ar.pak'
+rm 'release/win-unpacked/locales/bg.pak'
+rm 'release/win-unpacked/locales/bn.pak'
+rm 'release/win-unpacked/locales/ca.pak'
+rm 'release/win-unpacked/locales/cs.pak'
+rm 'release/win-unpacked/locales/da.pak'
+rm 'release/win-unpacked/locales/de.pak'
+rm 'release/win-unpacked/locales/el.pak'
+rm 'release/win-unpacked/locales/en-GB.pak'
+rm 'release/win-unpacked/locales/en-US.pak'
+rm 'release/win-unpacked/locales/es-419.pak'
+rm 'release/win-unpacked/locales/es.pak'
+rm 'release/win-unpacked/locales/et.pak'
+rm 'release/win-unpacked/locales/fa.pak'
+rm 'release/win-unpacked/locales/fi.pak'
+rm 'release/win-unpacked/locales/fil.pak'
+rm 'release/win-unpacked/locales/fr.pak'
+rm 'release/win-unpacked/locales/gu.pak'
+rm 'release/win-unpacked/locales/he.pak'
+rm 'release/win-unpacked/locales/hi.pak'
+rm 'release/win-unpacked/locales/hr.pak'
+rm 'release/win-unpacked/locales/hu.pak'
+rm 'release/win-unpacked/locales/id.pak'
+rm 'release/win-unpacked/locales/it.pak'
+rm 'release/win-unpacked/locales/ja.pak'
+rm 'release/win-unpacked/locales/kn.pak'
+rm 'release/win-unpacked/locales/ko.pak'
+rm 'release/win-unpacked/locales/lt.pak'
+rm 'release/win-unpacked/locales/lv.pak'
+rm 'release/win-unpacked/locales/ml.pak'
+rm 'release/win-unpacked/locales/mr.pak'
+rm 'release/win-unpacked/locales/ms.pak'
+rm 'release/win-unpacked/locales/nb.pak'
+rm 'release/win-unpacked/locales/nl.pak'
+rm 'release/win-unpacked/locales/pl.pak'
+rm 'release/win-unpacked/locales/pt-BR.pak'
+rm 'release/win-unpacked/locales/pt-PT.pak'
+rm 'release/win-unpacked/locales/ro.pak'
+rm 'release/win-unpacked/locales/ru.pak'
+rm 'release/win-unpacked/locales/sk.pak'
+rm 'release/win-unpacked/locales/sl.pak'
+rm 'release/win-unpacked/locales/sr.pak'
+rm 'release/win-unpacked/locales/sv.pak'
+rm 'release/win-unpacked/locales/sw.pak'
+rm 'release/win-unpacked/locales/ta.pak'
+rm 'release/win-unpacked/locales/te.pak'
+rm 'release/win-unpacked/locales/th.pak'
+rm 'release/win-unpacked/locales/tr.pak'
+rm 'release/win-unpacked/locales/uk.pak'
+rm 'release/win-unpacked/locales/ur.pak'
+rm 'release/win-unpacked/locales/vi.pak'
+rm 'release/win-unpacked/locales/zh-CN.pak'
+rm 'release/win-unpacked/locales/zh-TW.pak'
+rm 'release/win-unpacked/resources.pak'
+rm 'release/win-unpacked/resources/app.asar'
+rm 'release/win-unpacked/resources/elevate.exe'
+rm 'release/win-unpacked/snapshot_blob.bin'
+rm 'release/win-unpacked/v8_context_snapshot.bin'
+rm 'release/win-unpacked/vk_swiftshader.dll'
+rm 'release/win-unpacked/vk_swiftshader_icd.json'
+rm 'release/win-unpacked/vulkan-1.dll'
+Rewrite ec9c00a867be3393bc31da0c115e1d98ab2f56f8 (2/3) (1 seconds passed, remainRewrite 33d4a6ca577263f725c5ff9776f583f485c87f11 (2/3) (1 seconds passed, remaining 0 predicted)    rm 'release/TamsStatCalculator 1.0.0.exe'
+rm 'release/builder-debug.yml'
+rm 'release/builder-effective-config.yaml'
+rm 'release/win-unpacked/LICENSE.electron.txt'
+rm 'release/win-unpacked/LICENSES.chromium.html'
+rm 'release/win-unpacked/TamsStatCalculator.exe'
+rm 'release/win-unpacked/chrome_100_percent.pak'
+rm 'release/win-unpacked/chrome_200_percent.pak'
+rm 'release/win-unpacked/d3dcompiler_47.dll'
+rm 'release/win-unpacked/dxcompiler.dll'
+rm 'release/win-unpacked/dxil.dll'
+rm 'release/win-unpacked/ffmpeg.dll'
+rm 'release/win-unpacked/icudtl.dat'
+rm 'release/win-unpacked/libEGL.dll'
+rm 'release/win-unpacked/libGLESv2.dll'
+rm 'release/win-unpacked/locales/af.pak'
+rm 'release/win-unpacked/locales/am.pak'
+rm 'release/win-unpacked/locales/ar.pak'
+rm 'release/win-unpacked/locales/bg.pak'
+rm 'release/win-unpacked/locales/bn.pak'
+rm 'release/win-unpacked/locales/ca.pak'
+rm 'release/win-unpacked/locales/cs.pak'
+rm 'release/win-unpacked/locales/da.pak'
+rm 'release/win-unpacked/locales/de.pak'
+rm 'release/win-unpacked/locales/el.pak'
+rm 'release/win-unpacked/locales/en-GB.pak'
+rm 'release/win-unpacked/locales/en-US.pak'
+rm 'release/win-unpacked/locales/es-419.pak'
+rm 'release/win-unpacked/locales/es.pak'
+rm 'release/win-unpacked/locales/et.pak'
+rm 'release/win-unpacked/locales/fa.pak'
+rm 'release/win-unpacked/locales/fi.pak'
+rm 'release/win-unpacked/locales/fil.pak'
+rm 'release/win-unpacked/locales/fr.pak'
+rm 'release/win-unpacked/locales/gu.pak'
+rm 'release/win-unpacked/locales/he.pak'
+rm 'release/win-unpacked/locales/hi.pak'
+rm 'release/win-unpacked/locales/hr.pak'
+rm 'release/win-unpacked/locales/hu.pak'
+rm 'release/win-unpacked/locales/id.pak'
+rm 'release/win-unpacked/locales/it.pak'
+rm 'release/win-unpacked/locales/ja.pak'
+rm 'release/win-unpacked/locales/kn.pak'
+rm 'release/win-unpacked/locales/ko.pak'
+rm 'release/win-unpacked/locales/lt.pak'
+rm 'release/win-unpacked/locales/lv.pak'
+rm 'release/win-unpacked/locales/ml.pak'
+rm 'release/win-unpacked/locales/mr.pak'
+rm 'release/win-unpacked/locales/ms.pak'
+rm 'release/win-unpacked/locales/nb.pak'
+rm 'release/win-unpacked/locales/nl.pak'
+rm 'release/win-unpacked/locales/pl.pak'
+rm 'release/win-unpacked/locales/pt-BR.pak'
+rm 'release/win-unpacked/locales/pt-PT.pak'
+rm 'release/win-unpacked/locales/ro.pak'
+rm 'release/win-unpacked/locales/ru.pak'
+rm 'release/win-unpacked/locales/sk.pak'
+rm 'release/win-unpacked/locales/sl.pak'
+rm 'release/win-unpacked/locales/sr.pak'
+rm 'release/win-unpacked/locales/sv.pak'
+rm 'release/win-unpacked/locales/sw.pak'
+rm 'release/win-unpacked/locales/ta.pak'
+rm 'release/win-unpacked/locales/te.pak'
+rm 'release/win-unpacked/locales/th.pak'
+rm 'release/win-unpacked/locales/tr.pak'
+rm 'release/win-unpacked/locales/uk.pak'
+rm 'release/win-unpacked/locales/ur.pak'
+rm 'release/win-unpacked/locales/vi.pak'
+rm 'release/win-unpacked/locales/zh-CN.pak'
+rm 'release/win-unpacked/locales/zh-TW.pak'
+rm 'release/win-unpacked/resources.pak'
+rm 'release/win-unpacked/resources/app.asar'
+rm 'release/win-unpacked/resources/elevate.exe'
+rm 'release/win-unpacked/snapshot_blob.bin'
+rm 'release/win-unpacked/v8_context_snapshot.bin'
+rm 'release/win-unpacked/vk_swiftshader.dll'
+rm 'release/win-unpacked/vk_swiftshader_icd.json'
+rm 'release/win-unpacked/vulkan-1.dll'
+Ref 'refs/heads/main' was rewritten
+Enumerating objects: 44, done.
+Counting objects: 100% (44/44), done.
+Delta compression using up to 20 threads
+Compressing objects: 100% (43/43), done.
+Writing objects: 100% (44/44), 62.21 KiB | 4.79 MiB/s, done.
+Total 44 (delta 2), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (2/2), done.
+To https://github.com/TodoHamwich/TamsStatCalc.git
+ * [new branch]      main -> main

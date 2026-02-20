@@ -21,8 +21,9 @@ export function validateNpcCount(npcs: number, maxPerPhases: number, notes: GmNo
 }
 
 export function checkCustomSkillName(name: string, notes: GmNotes): void {
+  if (!name.trim()) return; // ignore empty names
   if (!isStandardSkill(name)) {
     notes.talkToGm = true;
-    notes.reasons.push(`Custom skill name used: ${name}`);
+    notes.reasons.push(`Custom skill "${name}" used (requires GM approval)`);
   }
 }

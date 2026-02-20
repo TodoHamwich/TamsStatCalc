@@ -20,5 +20,6 @@ export function computeResources(setup: CharacterSetup): ResourcePool {
         traitUps: phases * RESOURCES_PER_PHASE.traitUps,
         abilityOrWeaponUps: phases * RESOURCES_PER_PHASE.abilityOrWeaponUps,
         majorSkillPoints: phases * RESOURCES_PER_PHASE.majorSkillPoints,
+        abilityPoints: phases * RESOURCES_PER_PHASE.abilityPoints,
     };
 }

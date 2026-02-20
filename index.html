@@ -70,6 +70,7 @@
     <div class="resource-item"><span class="resource-label">Stat UPs</span><span id="statRes" class="resource-val">0</span></div>
     <div class="resource-item"><span class="resource-label">Skill UPs</span><span id="skillRes" class="resource-val">0</span></div>
     <div class="resource-item"><span class="resource-label">Trait UPs</span><span id="traitRes" class="resource-val">0</span></div>
+    <div class="resource-item"><span class="resource-label">Ability Pts</span><span id="apRes" class="resource-val">0</span></div>
     <div class="resource-item"><span class="resource-label">Major Skill Pts</span><span id="mspRes" class="resource-val">0</span></div>
     <div class="resource-item" style="margin-left:auto; text-align:right">
         <div id="charDisplayName" style="font-weight:bold">New Character</div>
@@ -114,7 +115,7 @@
         </div>
 
         <div class="panel scroll-panel">
-          <h3>Stats</h3>
+          <h3>Stats (Starting: <span id="startingStatDisplay">0</span>)</h3>
           <div id="statControls"></div>
         </div>
       </div>
@@ -124,12 +125,27 @@
           <h3>Skills</h3>
           <div style="display:flex; gap:8px; font-size:0.8em; color:#6b7280; margin-bottom:4px; padding-left:4px">
               <span style="flex:1">Skill Name</span>
-              <span style="width:40px">MSP</span>
+              <span style="width:60px"></span>
               <span style="width:50px">Value</span>
               <span style="width:30px"></span>
           </div>
           <div id="skillList" style="margin-bottom: 12px;"></div>
           <button id="addSkillBtn" style="width:100%">+ Add Skill</button>
+        </div>
+
+        <div id="mspPanel" class="panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+            <h3 style="margin:0">Major Skill Points</h3>
+            <button id="toggleMspBtn" style="padding:2px 8px; font-size:0.8em">Minimize</button>
+          </div>
+          <div id="mspContent">
+            <div id="mspManager">
+              <p style="font-size:0.8em; color: #6b7280; margin-bottom:10px">
+                Apply Major Skill Points (MSP) to skills. Max 3 per skill.
+              </p>
+              <div id="mspAssignments"></div>
+            </div>
+          </div>
         </div>
 
         <div class="panel scroll-panel">
@@ -171,6 +187,10 @@
       <div class="row">
         <div class="label">Extra Ability/Weapon UPs</div>
         <input id="dtAbilityUps" type="number" min="0" value="0" />
+      </div>
+      <div class="row">
+        <div class="label">Ability Points Spent</div>
+        <input id="apSpent" type="number" min="0" value="0" />
       </div>
     </div>
   </div>

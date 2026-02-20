@@ -1,0 +1,30 @@
+{
+  "name": "sda",
+  "isNpc": false,
+  "setup": {
+    "phaseOfLife": "Early Adulthood (20-30)",
+    "importantNpcCount": 0
+  },
+  "stats": {
+    "Strength": 25,
+    "Dexterity": 25,
+    "Endurance": 25,
+    "Wisdom": 25,
+    "Intelligence": 25
+  },
+  "skills": [],
+  "traits": [
+    {
+      "name": "Skill Issue",
+      "level": 3,
+      "bonusStat": "Strength"
+    }
+  ],
+  "downtime": {
+    "statUps": 800,
+    "skillUps": 800,
+    "traitUps": 800,
+    "abilityOrWeaponUps": 52652
+  },
+  "majorSkillPointsSpent": 0
+}

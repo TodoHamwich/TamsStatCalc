@@ -24,5 +24,6 @@ exports.RESOURCES_PER_PHASE = {
     traitUps: 1,
     abilityOrWeaponUps: 5,
     npcStatUps: 9,
-    majorSkillPoints: 1
+    majorSkillPoints: 1,
+    abilityPoints: 1
 };

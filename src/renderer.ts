@@ -34,7 +34,8 @@ let currentCharacter: CharacterData = {
     skills: [],
     traits: [],
     downtime: { statUps: 0, skillUps: 0, traitUps: 0, abilityOrWeaponUps: 0 },
-    majorSkillPointsSpent: 0
+    majorSkillPointsSpent: 0,
+    abilityPointsSpent: 0
 };
 
 // DOM Elements
@@ -49,10 +50,17 @@ const gmReasonsSpan = document.getElementById('gmReasons') as HTMLSpanElement;
 const statRes = document.getElementById('statRes') as HTMLSpanElement;
 const skillRes = document.getElementById('skillRes') as HTMLSpanElement;
 const traitRes = document.getElementById('traitRes') as HTMLSpanElement;
+const apRes = document.getElementById('apRes') as HTMLSpanElement;
 const mspRes = document.getElementById('mspRes') as HTMLSpanElement;
+
+const mspPanel = document.getElementById('mspPanel') as HTMLDivElement;
+const mspContent = document.getElementById('mspContent') as HTMLDivElement;
+const toggleMspBtn = document.getElementById('toggleMspBtn') as HTMLButtonElement;
+let mspMinimized = false;
 
 const statControls = document.getElementById('statControls') as HTMLDivElement;
 const skillList = document.getElementById('skillList') as HTMLDivElement;
+const mspAssignments = document.getElementById('mspAssignments') as HTMLDivElement;
 const traitList = document.getElementById('traitList') as HTMLDivElement;
 const debugOutput = document.getElementById('debugOutput') as HTMLPreElement;
 
@@ -60,6 +68,8 @@ const dtStatUps = document.getElementById('dtStatUps') as HTMLInputElement;
 const dtSkillUps = document.getElementById('dtSkillUps') as HTMLInputElement;
 const dtTraitUps = document.getElementById('dtTraitUps') as HTMLInputElement;
 const dtAbilityUps = document.getElementById('dtAbilityUps') as HTMLInputElement;
+const apSpentInp = document.getElementById('apSpent') as HTMLInputElement;
+const startingStatDisplay = document.getElementById('startingStatDisplay') as HTMLSpanElement;
 
 const loadModal = document.getElementById('loadModal') as HTMLDivElement;
 const fileList = document.getElementById('fileList') as HTMLDivElement;
@@ -118,7 +128,11 @@ function init() {
         valInp.style.fontWeight = 'bold';
         valInp.style.width = '50px';
         valInp.oninput = (e) => {
-            currentCharacter.stats[name] = parseInt((e.target as HTMLInputElement).value) || 0;
+            let v = parseInt((e.target as HTMLInputElement).value) || 0;
+            const startStats = getStartingStatsForPhase(currentCharacter.setup.phaseOfLife);
+            if (v < startStats[name]) v = startStats[name];
+            currentCharacter.stats[name] = v;
+            (e.target as HTMLInputElement).value = String(v);
             updateResources();
         };
         statValElements[name] = valInp;
@@ -130,9 +144,12 @@ function init() {
         const btnMinus = document.createElement('button');
         btnMinus.textContent = '-';
         btnMinus.onclick = () => { 
-            currentCharacter.stats[name]--; 
-            valInp.value = String(currentCharacter.stats[name]);
-            updateResources(); 
+            const startStats = getStartingStatsForPhase(currentCharacter.setup.phaseOfLife);
+            if (currentCharacter.stats[name] > startStats[name]) {
+                currentCharacter.stats[name]--; 
+                valInp.value = String(currentCharacter.stats[name]);
+                updateResources(); 
+            }
         };
         
         const btnPlus = document.createElement('button');
@@ -176,12 +193,18 @@ function init() {
         updateResources();
     };
 
-    [dtStatUps, dtSkillUps, dtTraitUps, dtAbilityUps].forEach(inp => {
+    toggleMspBtn.onclick = () => {
+        mspMinimized = !mspMinimized;
+        updateMspPanelVisibility();
+    };
+
+    [dtStatUps, dtSkillUps, dtTraitUps, dtAbilityUps, apSpentInp].forEach(inp => {
         inp.oninput = () => {
             currentCharacter.downtime.statUps = parseInt(dtStatUps.value) || 0;
             currentCharacter.downtime.skillUps = parseInt(dtSkillUps.value) || 0;
             currentCharacter.downtime.traitUps = parseInt(dtTraitUps.value) || 0;
             currentCharacter.downtime.abilityOrWeaponUps = parseInt(dtAbilityUps.value) || 0;
+            currentCharacter.abilityPointsSpent = parseInt(apSpentInp.value) || 0;
             updateResources();
         };
     });
@@ -202,6 +225,7 @@ function syncUI() {
     });
     
     renderSkills();
+    renderMSPManager();
     renderTraits();
     
     // Downtime
@@ -209,6 +233,7 @@ function syncUI() {
     dtSkillUps.value = String(currentCharacter.downtime?.skillUps || 0);
     dtTraitUps.value = String(currentCharacter.downtime?.traitUps || 0);
     dtAbilityUps.value = String(currentCharacter.downtime?.abilityOrWeaponUps || 0);
+    apSpentInp.value = String(currentCharacter.abilityPointsSpent || 0);
 
     updateResources();
 }
@@ -253,6 +278,7 @@ function renderSkills() {
                         nameInp.value = s;
                         currentCharacter.skills[index].name = s;
                         suggestionsDiv.style.display = 'none';
+                        renderMSPManager();
                         updateResources();
                     };
                     suggestionsDiv.appendChild(item);
@@ -267,6 +293,7 @@ function renderSkills() {
             const val = (e.target as HTMLInputElement).value;
             currentCharacter.skills[index].name = val;
             updateSuggestions(val);
+            renderMSPManager();
             updateResources();
         };
         nameInp.onfocus = () => updateSuggestions(nameInp.value);
@@ -282,19 +309,11 @@ function renderSkills() {
         valInp.value = String(skill.value);
         valInp.style.width = '50px';
         valInp.oninput = (e) => {
-            currentCharacter.skills[index].value = parseInt((e.target as HTMLInputElement).value) || 0;
-            updateResources();
-        };
-
-        const mspInp = document.createElement('input');
-        mspInp.type = 'number';
-        mspInp.min = '0';
-        mspInp.max = '3';
-        mspInp.value = String(skill.mspSpent || 0);
-        mspInp.style.width = '40px';
-        mspInp.title = 'MSP spent on this skill (1:5, 2:10, 3:15)';
-        mspInp.oninput = (e) => {
-            currentCharacter.skills[index].mspSpent = parseInt((e.target as HTMLInputElement).value) || 0;
+            let v = parseInt((e.target as HTMLInputElement).value) || 0;
+            if (v < 0) v = 0;
+            if (v > 40) v = 40;
+            currentCharacter.skills[index].value = v;
+            (e.target as HTMLInputElement).value = String(v);
             updateResources();
         };
 
@@ -303,14 +322,95 @@ function renderSkills() {
         delBtn.onclick = () => {
             currentCharacter.skills.splice(index, 1);
             renderSkills();
+            renderMSPManager();
             updateResources();
         };
 
         row.appendChild(container);
-        row.appendChild(mspInp);
         row.appendChild(valInp);
         row.appendChild(delBtn);
         skillList.appendChild(row);
+    });
+}
+
+function renderMSPManager() {
+    mspAssignments.innerHTML = '';
+    
+    // Only show skills that have been named
+    const namedSkills = currentCharacter.skills.filter(s => s.name.trim() !== '');
+    
+    if (namedSkills.length === 0) {
+        mspAssignments.innerHTML = '<p style="font-size:0.9em; color:#6b7280 italic">Add and name skills above to apply MSP</p>';
+        return;
+    }
+
+    namedSkills.forEach((skill) => {
+        // Find the actual index in the main skills array to update it
+        const originalIndex = currentCharacter.skills.findIndex(s => s === skill);
+
+        const row = document.createElement('div');
+        row.className = 'stat-row';
+        row.style.gridTemplateColumns = '1fr 50px auto';
+        
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.style.width = 'auto';
+        label.textContent = skill.name;
+        
+        const valSpan = document.createElement('span');
+        valSpan.style.fontWeight = 'bold';
+        valSpan.style.textAlign = 'center';
+        valSpan.textContent = String(skill.mspSpent || 0);
+        
+        const controls = document.createElement('div');
+        controls.style.display = 'flex';
+        controls.style.gap = '4px';
+        
+        const btnMinus = document.createElement('button');
+        btnMinus.textContent = '-';
+        btnMinus.disabled = (skill.mspSpent || 0) <= 0;
+        btnMinus.onclick = () => {
+            if ((skill.mspSpent || 0) > 0) {
+                const oldMsp = skill.mspSpent || 0;
+                const newMsp = oldMsp - 1;
+                currentCharacter.skills[originalIndex].mspSpent = newMsp;
+                
+                // Subtract 5 from current value when removing MSP, but floor at 0
+                const oldVal = currentCharacter.skills[originalIndex].value || 0;
+                currentCharacter.skills[originalIndex].value = Math.max(0, oldVal - 5);
+                
+                renderSkills();
+                renderMSPManager();
+                updateResources();
+            }
+        };
+        
+        const btnPlus = document.createElement('button');
+        btnPlus.textContent = '+';
+        btnPlus.disabled = (skill.mspSpent || 0) >= 3;
+        btnPlus.onclick = () => {
+            if ((skill.mspSpent || 0) < 3) {
+                const oldMsp = skill.mspSpent || 0;
+                const newMsp = oldMsp + 1;
+                currentCharacter.skills[originalIndex].mspSpent = newMsp;
+                
+                // Add 5 to current value when adding MSP, but cap at 40
+                const oldVal = currentCharacter.skills[originalIndex].value || 0;
+                currentCharacter.skills[originalIndex].value = Math.min(40, oldVal + 5);
+                
+                renderSkills();
+                renderMSPManager();
+                updateResources();
+            }
+        };
+        
+        controls.appendChild(btnMinus);
+        controls.appendChild(btnPlus);
+        
+        row.appendChild(label);
+        row.appendChild(valSpan);
+        row.appendChild(controls);
+        mspAssignments.appendChild(row);
     });
 }
 
@@ -356,7 +456,11 @@ function renderTraits() {
         levelInp.value = String(trait.level);
         levelInp.style.width = '50px';
         levelInp.oninput = (e) => {
-            currentCharacter.traits[index].level = parseInt((e.target as HTMLInputElement).value) || 1;
+            let v = parseInt((e.target as HTMLInputElement).value) || 1;
+            if (v < 1) v = 1;
+            if (v > 10) v = 10;
+            currentCharacter.traits[index].level = v;
+            (e.target as HTMLInputElement).value = String(v);
             updateResources();
         };
 
@@ -416,6 +520,7 @@ function updateResources() {
 
     const resources = computeResources(currentCharacter.setup);
     const startStats = getStartingStatsForPhase(phase);
+    if (startingStatDisplay) startingStatDisplay.textContent = String(startStats.Strength);
 
     // Calculate Stat Costs
     let totalStatCost = 0;
@@ -462,14 +567,29 @@ function updateResources() {
     mspRes.textContent = String(mspLeft);
     mspRes.className = mspLeft < 0 ? 'resource-val negative' : 'resource-val';
 
+    // Auto-minimize MSP if all spent and not already minimized
+    if (mspLeft === 0 && !mspMinimized && mspSpentTotal > 0) {
+        mspMinimized = true;
+        updateMspPanelVisibility();
+    } else if (mspLeft > 0 && mspMinimized) {
+        // Auto-expand if points become available again (e.g. changing POL)
+        mspMinimized = false;
+        updateMspPanelVisibility();
+    }
+
+    const apLeft = resources.abilityPoints - (currentCharacter.abilityPointsSpent || 0);
+    apRes.textContent = String(apLeft);
+    apRes.className = apLeft < 0 ? 'resource-val negative' : 'resource-val';
+
     // GM Notes
     const reasons: string[] = [...gmNotes.reasons];
-    if (mspLeft < 0) reasons.push('Overspent Major Skill Points');
-    if (phase === PhaseOfLife.Elder) reasons.push('Elder Phase');
-    if (statRefunds) reasons.push('Stat decrease');
-    if (skillRefunds) reasons.push('Skill decrease');
-    if (trLeft < 0) reasons.push('Overspent Trait UPs');
-    if (currentCharacter.setup.importantNpcCount > maxNpcs) reasons.push('NPC count over limit');
+    if (mspLeft < 0) reasons.push(`Overspent Major Skill Points (${-mspLeft})`);
+    if (apLeft < 0) reasons.push(`Overspent Ability Points (${-apLeft})`);
+    if (phase === PhaseOfLife.Elder) reasons.push('Elder Phase (requires GM discussion on longevity/decline)');
+    if (statRefunds) reasons.push('Stat value decreased (requires GM approval for point refund)');
+    if (skillRefunds) reasons.push('Skill value decreased (requires GM approval for point refund)');
+    if (trLeft < 0) reasons.push(`Overspent Trait UPs (${-trLeft})`);
+    if (currentCharacter.setup.importantNpcCount > maxNpcs) reasons.push(`NPC count (${currentCharacter.setup.importantNpcCount}) exceeds phase limit (${maxNpcs})`);
 
     if (reasons.length) {
         gmReasonsSpan.textContent = reasons.join(', ');
@@ -482,6 +602,16 @@ function updateResources() {
     // Hide debug in production distribution
     debugOutput.style.display = 'none';
     debugOutput.textContent = JSON.stringify(currentCharacter, null, 2);
+}
+
+function updateMspPanelVisibility() {
+    if (mspMinimized) {
+        mspContent.style.display = 'none';
+        toggleMspBtn.textContent = 'Expand';
+    } else {
+        mspContent.style.display = 'block';
+        toggleMspBtn.textContent = 'Minimize';
+    }
 }
 
 function listSaves() {
@@ -544,6 +674,7 @@ closeModalBtn.onclick = () => {
 addSkillBtn.onclick = () => {
     currentCharacter.skills.push({ name: '', value: 0, mspSpent: 0 });
     renderSkills();
+    renderMSPManager();
     updateResources();
 };
 

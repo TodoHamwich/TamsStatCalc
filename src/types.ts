@@ -21,6 +21,7 @@ export interface ResourcePool {
     traitUps: number;
     abilityOrWeaponUps: number;
     majorSkillPoints: number;
+    abilityPoints: number;
 }
 
 export interface Trait {
@@ -45,4 +46,5 @@ export interface CharacterData {
     traits: Trait[];
     downtime: DowntimeResources;
     majorSkillPointsSpent: number;
+    abilityPointsSpent: number;
 }
