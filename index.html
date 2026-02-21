@@ -19,7 +19,7 @@
     button:hover { background: #f3f4f6; }
     button.primary { background: #2563eb; color: white; border-color: #1d4ed8; }
     button.primary:hover { background: #1d4ed8; }
-    .stat-row { display: grid; grid-template-columns: 100px 50px 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .stat-row { display: grid; grid-template-columns: 140px 40px 50px 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
     .resource-bar { display: flex; gap: 20px; background: #1f2937; color: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; position: sticky; top: 0; z-index: 100; flex-shrink: 0; }
     .resource-item { display: flex; flex-direction: column; }
     .resource-val { font-size: 1.2em; font-weight: bold; }
@@ -116,6 +116,12 @@
 
         <div class="panel scroll-panel">
           <h3>Stats (Starting: <span id="startingStatDisplay">0</span>)</h3>
+          <div style="display:flex; gap:8px; font-size:0.8em; color:#6b7280; margin-bottom:4px; padding-left:4px">
+              <span style="width:140px">Stat Name</span>
+              <span style="width:40px">Total</span>
+              <span style="width:50px">Base</span>
+              <span style="flex:1">Adjust</span>
+          </div>
           <div id="statControls"></div>
         </div>
       </div>

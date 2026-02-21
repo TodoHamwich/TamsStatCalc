@@ -137,23 +137,22 @@ function init() {
         bonusSpan.style.marginLeft = '4px';
         bonusSpan.id = `bonus-${name}`;
         label.appendChild(bonusSpan);
+        const totalSpan = document.createElement('span');
+        totalSpan.style.marginLeft = 'auto';
+        totalSpan.style.marginRight = '8px';
+        totalSpan.style.fontWeight = 'bold';
+        totalSpan.style.color = '#2563eb';
+        totalSpan.id = `total-${name}`;
+        totalSpan.title = "Base Stat + Trait Bonuses";
         const valInp = document.createElement('input');
         valInp.type = 'number';
         valInp.style.fontWeight = 'bold';
         valInp.style.width = '50px';
         valInp.oninput = (e) => {
             let v = parseInt(e.target.value) || 0;
-            const phase = currentCharacter.setup.phaseOfLife;
-            const startStats = (0, resources_1.getStartingStatsForPhase)(phase);
-            const traitStatBonuses = { Strength: 0, Dexterity: 0, Endurance: 0, Wisdom: 0, Intelligence: 0 };
-            currentCharacter.traits.forEach(tr => {
-                if (tr.bonusStat && tr.bonusStat !== "Profession") {
-                    traitStatBonuses[tr.bonusStat] += tr.level * 5;
-                }
-            });
-            const effectiveStart = startStats[name] + (traitStatBonuses[name] || 0);
-            if (v < effectiveStart)
-                v = effectiveStart;
+            const floor = 1;
+            if (v < floor)
+                v = floor;
             currentCharacter.stats[name] = v;
             e.target.value = String(v);
             updateResources();
@@ -165,16 +164,8 @@ function init() {
         const btnMinus = document.createElement('button');
         btnMinus.textContent = '-';
         btnMinus.onclick = () => {
-            const phase = currentCharacter.setup.phaseOfLife;
-            const startStats = (0, resources_1.getStartingStatsForPhase)(phase);
-            const traitStatBonuses = { Strength: 0, Dexterity: 0, Endurance: 0, Wisdom: 0, Intelligence: 0 };
-            currentCharacter.traits.forEach(tr => {
-                if (tr.bonusStat && tr.bonusStat !== "Profession") {
-                    traitStatBonuses[tr.bonusStat] += tr.level * 5;
-                }
-            });
-            const effectiveStart = startStats[name] + (traitStatBonuses[name] || 0);
-            if (currentCharacter.stats[name] > effectiveStart) {
+            const floor = 1;
+            if (currentCharacter.stats[name] > floor) {
                 currentCharacter.stats[name]--;
                 valInp.value = String(currentCharacter.stats[name]);
                 updateResources();
@@ -190,6 +181,7 @@ function init() {
         controls.appendChild(btnMinus);
         controls.appendChild(btnPlus);
         row.appendChild(label);
+        row.appendChild(totalSpan);
         row.appendChild(valInp);
         row.appendChild(controls);
         statControls.appendChild(row);
@@ -513,11 +505,11 @@ function updateResources() {
     });
     const phase = currentCharacter.setup.phaseOfLife;
     const startStats = (0, resources_1.getStartingStatsForPhase)(phase);
-    // Ensure stats are not below effective minimum (startStat + traitBonus)
+    // Ensure stats are not below floor
     Object.keys(currentCharacter.stats).forEach(name => {
-        const effectiveMin = startStats[name] + (traitStatBonuses[name] || 0);
-        if (currentCharacter.stats[name] < effectiveMin) {
-            currentCharacter.stats[name] = effectiveMin;
+        const floor = 1;
+        if (currentCharacter.stats[name] < floor) {
+            currentCharacter.stats[name] = floor;
         }
     });
     // Update stat displays
@@ -526,10 +518,15 @@ function updateResources() {
             statValElements[name].value = String(currentCharacter.stats[name]);
         }
         const bonusEl = document.getElementById(`bonus-${name}`);
+        const totalEl = document.getElementById(`total-${name}`);
         if (bonusEl) {
             const bonus = traitStatBonuses[name] || 0;
-            bonusEl.textContent = bonus > 0 ? `(+${bonus})` : '';
-            bonusEl.title = `Total: ${currentCharacter.stats[name]}`;
+            bonusEl.textContent = bonus !== 0 ? `(${bonus > 0 ? '+' : ''}${bonus})` : '';
+        }
+        if (totalEl) {
+            const base = currentCharacter.stats[name];
+            const bonus = traitStatBonuses[name] || 0;
+            totalEl.textContent = String(base + bonus);
         }
     });
     const maxNpcs = (0, resources_1.getPhaseCount)(phase);
@@ -542,8 +539,8 @@ function updateResources() {
     let totalStatCost = 0;
     let statRefunds = false;
     Object.keys(currentCharacter.stats).forEach(s => {
-        const effectiveStartStat = startStats[s] + (traitStatBonuses[s] || 0);
-        const change = (0, logic_1.getStatChangeCost)(effectiveStartStat, currentCharacter.stats[s]);
+        const baseStartStat = startStats[s];
+        const change = (0, logic_1.getStatChangeCost)(baseStartStat, currentCharacter.stats[s]);
         totalStatCost += change.cost;
         if (change.refund)
             statRefunds = true;
